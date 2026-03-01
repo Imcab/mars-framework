@@ -1,0 +1,142 @@
+{
+  "name": "mars-framework",
+  "displayName": "MARS Framework",
+  "description": "Official extension for STZ Robotics MARS Framework",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "mars.createModule",
+          "group": "mars@1",
+          "when": "explorerResourceIsFolder"
+        }
+      ]
+    },
+
+    "configuration": {
+      "title": "MARS Framework",
+      "properties": {
+        "marsFramework.teamNumber": {
+          "type": "string",
+          "default": "",
+          "description": "Default Team Number for FRC Projects"
+        },
+        "marsFramework.workspacePath": {
+          "type": "string",
+          "default": "",
+          "description": "Default Base Folder for new MARS projects"
+        },
+        "marsFramework.autoSaveDeploy": {
+          "type": "boolean",
+          "default": true,
+          "description": "Auto-save all files automatically before deploying to RoboRIO"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "mars.launchTerminal",
+        "title": "MARS: Launch Terminal"
+      },
+      {
+        "command": "mars.deploy",
+        "title": "MARS: Deploy to RoboRIO"
+      },
+      {
+        "command": "mars.simulate",
+        "title": "MARS: Local Simulation"
+      },
+      {
+        "command": "mars.createProject",
+        "title": "MARS: Create New Project"
+      },
+      {
+        "command": "mars.settings",
+        "title": "MARS: Framework Settings"
+      },
+      {
+        "command": "mars.launchAlloy",
+        "title": "MARS: Launch Alloy Dashboard"
+      },
+      {
+        "command": "mars.launchLogTool",
+        "title": "MARS: Launch Log Tool"
+      },
+      {
+        "command": "mars.updateGCS",
+        "title": "MARS: Check for GCS Updates"
+      },
+      {
+        "command": "mars.updateAlloy",
+        "title": "MARS: Check for Alloy Updates"
+      },
+      {
+        "command": "mars.updateLogTool",
+        "title": "MARS: Check for LogTool Updates"
+      },
+      {
+        "command": "mars.createModule",
+        "title": "Mars: createModule"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "mars-explorer",
+          "title": "MARS Framework",
+          "icon": "media/mars-logo.png"
+        }
+      ]
+    },
+    "views": {
+      "mars-explorer": [
+        {
+          "icon": "media/mars-logo.png",
+          "id": "mars-actions",
+          "type": "webview",
+          "name": "Mission Control"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "npm run check-types && npm run lint && node esbuild.js",
+    "watch": "npm-run-all -p watch:*",
+    "watch:esbuild": "node esbuild.js --watch",
+    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+    "package": "npm run check-types && npm run lint && node esbuild.js --production",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/adm-zip": "^0.5.7",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "@types/vscode": "^1.85.0",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2",
+    "esbuild": "^0.27.2",
+    "eslint": "^9.39.2",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.54.0"
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.16",
+    "axios": "^1.13.6"
+  }
+}
