@@ -1,71 +1,58 @@
-# mars-framework README
+# MARS Framework Extension for VS Code
 
-This is the README for your extension "mars-framework". After writing up a brief description, we recommend including the following sections.
+Welcome to the **Official STZ Robotics MARS Framework Extension**. This tool is designed to supercharge the workflow of FRC software teams by integrating project scaffolding, over-the-air (OTA) updates, and telemetry management directly into Visual Studio Code.
 
-## Features
+## Key Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+### Project Builder
+Forget about manual cloning and configuring. The **Project Builder** automatically fetches the latest `MarsTemplate`, clears the git history for a fresh start, and automatically injects your FRC Team Number directly into the WPILib preferences.
 
-For example if there is an image subfolder under your extension project workspace:
+### Advanced Module Scaffolding
+Stop writing boilerplate code. Right-click any folder inside your project to generate a complete MARS Module architecture in seconds. It automatically creates and routes:
+- Hardware I/O Interfaces (`IO.java`)
+- Module Requests & Actions (`Request.java`)
+- Diagnostic Status Codes (`Code.java`)
+- Request Factories (`RequestFactory.java`)
+- Modular Subsystem & Telemetry (`Subsystem.java`)
 
-\!\[feature X\]\(images/feature-x.png\)
+### Over-The-Air (OTA) Ecosystem Updates
+Keep your team on the same page without passing ZIP files around. With a single click from the Side Panel, the extension checks GitHub Releases to download, extract, and install the latest versions of:
+- **MARS GCS** (Ground Control Station)
+- **Alloy Dashboard** (Telemetry & Diagnostics)
+- **MARS LogTool** (Log requests)
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
-
-## Requirements
-
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+### Persistent Framework Settings
+Configure your default Team Number, workspace paths. The extension saves your preferences globally in VS Code, ready to be injected into any new project you create.
 
 ---
 
-## Following extension guidelines
+## Installation (VSIX)
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
+1. Download the latest `mars-framework-x.x.x.vsix` file provided by the software lead.
+2. Open Visual Studio Code.
+3. Navigate to the **Extensions** view (`Ctrl+Shift+X`).
+4. Click the `...` (Views and More Actions) menu on the top right of the Extensions panel.
+5. Select **Install from VSIX...** and choose the downloaded file.
+6. Reload VS Code.
 
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
+---
 
-## Working with Markdown
+## Usage Guide
 
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
+### Mission Control Panel
+Once installed, you will see the **MARS Framework** logo on your VS Code Activity Bar (left side). Click it to open the **Mission Control Panel**, where you can:
+- Launch the **Project Builder**.
+- Boot up the **MARS GCS** or **Alloy Dashboard** directly from your project's release folders.
+- Deploy code or run local simulations.
+- Access the **Framework Settings**.
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
+### Creating a New Module
+1. Open your FRC Project in VS Code.
+2. Navigate to your `core/modules` folder (or wherever you want the module to live).
+3. **Right-click** the folder and select **`Mars: Create Module`**.
+4. Enter the name of your subsystem (e.g., `Intake`, `Climber`, `Shooter`).
+5. The extension will generate the folder, the 5 required architectural files, and copy the `KeyManager` constant to your clipboard automatically.
 
-## For more information
+---
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+*Built with by STZ Robotics Software Team.*
