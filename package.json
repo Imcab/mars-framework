@@ -2,7 +2,13 @@
   "name": "mars-framework",
   "displayName": "MARS Framework",
   "description": "Official extension for STZ Robotics MARS Framework",
-  "version": "0.0.1",
+  "publisher": "stz-robotics",
+  "version": "0.0.2",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Imcab/mars-framework"
+  },
+  "icon": "media/mars-logo.png",
   "engines": {
     "vscode": "^1.85.0"
   },

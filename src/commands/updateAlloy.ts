@@ -27,7 +27,7 @@ export function registerAlloyUpdaterCommand(context: vscode.ExtensionContext) {
             try {
                 progress.report({ message: "Checking for Alloy updates..." });
                 // APUNTANDO AL NUEVO REPOSITORIO DE ALLOY
-                const ghUrl = 'https://api.github.com/repos/Imcab/MarsAlloy/releases/latest';
+                const ghUrl = 'https://api.github.com/repos/STZ-Robotics/MarsAlloy/releases/latest';
                 const response = await axios.get(ghUrl);
                 
                 const latestVersion = response.data.tag_name;

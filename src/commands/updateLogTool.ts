@@ -26,7 +26,7 @@ export function registerLogToolUpdaterCommand(context: vscode.ExtensionContext) 
             try {
                 progress.report({ message: "Checking for LogTool updates..." });
                 // APUNTANDO AL NUEVO REPOSITORIO DE ALLOY
-                const ghUrl = 'https://api.github.com/repos/Imcab/MarsLogTool/releases/latest';
+                const ghUrl = 'https://api.github.com/repos/STZ-Robotics/MarsLogTool/releases/latest';
                 const response = await axios.get(ghUrl);
                 
                 const latestVersion = response.data.tag_name;

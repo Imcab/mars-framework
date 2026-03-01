@@ -57,7 +57,7 @@ export function registerProjectCreatorCommand(context: vscode.ExtensionContext) 
                 }, async (progress) => {
                     return new Promise<void>((resolve, reject) => {
                         
-                        const REPO_URL = "https://github.com/Imcab/MarsTemplate.git"; 
+                        const REPO_URL = "https://github.com/STZ-Robotics/MarsTemplate.git"; 
                         
                         cp.exec(`git clone ${REPO_URL} "${targetPath}"`, (error) => {
                             if (error) {
