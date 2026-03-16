@@ -20,17 +20,25 @@ export function registerProjectCreatorCommand(context: vscode.ExtensionContext) 
             } 
         );
 
-        // 1. Buscamos el banner
-        const imagePath = vscode.Uri.joinPath(context.extensionUri, 'media', 'mars-banner-alt.png');
+        // 1. Buscamos el banner (AHORA USAMOS EL BLANCO NORMAL)
+        const imagePath = vscode.Uri.joinPath(context.extensionUri, 'media', 'mars-banner.png');
         const imageUri = panel.webview.asWebviewUri(imagePath);
+
+        // 1.5 Buscamos el archivo CSS de MARS
+        const stylePath = vscode.Uri.joinPath(context.extensionUri, 'media', 'settings.css');
+        const styleUri = panel.webview.asWebviewUri(stylePath);
 
         // 2. LEEMOS LAS CONFIGURACIONES GUARDADAS
         const config = vscode.workspace.getConfiguration('marsFramework');
         const defaultTeam = config.get('teamNumber', '');
         const defaultFolder = config.get('workspacePath', '');
 
-        // 3. Pasamos la imagen, la carpeta y el equipo a la vista HTML
-        panel.webview.html = getProjectCreatorHtml(imageUri.toString(), defaultFolder as string, defaultTeam as string);
+        panel.webview.html = getProjectCreatorHtml(
+            imageUri.toString(), 
+            styleUri.toString(),
+            defaultFolder as string, 
+            defaultTeam as string
+        );
 
         panel.webview.onDidReceiveMessage(async message => {
             if (message.command === 'error') {

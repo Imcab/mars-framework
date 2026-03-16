@@ -3,7 +3,7 @@
   "displayName": "MARS Framework",
   "description": "Official extension for STZ Robotics MARS Framework",
   "publisher": "STZRobotics",
-  "version": "0.0.2",
+  "version": "0.0.5",
   "repository": {
     "type": "git",
     "url": "https://github.com/Imcab/mars-framework"
@@ -41,6 +41,11 @@
           "default": "",
           "description": "Default Base Folder for new MARS projects"
         },
+        "marsFramework.toolsPath": {
+          "type": "string",
+          "default": "",
+          "description": "Default Tools path"
+        },
         "marsFramework.autoSaveDeploy": {
           "type": "boolean",
           "default": true,
@@ -54,6 +59,14 @@
         "title": "MARS: Launch Terminal"
       },
       {
+        "command": "mars.createDiagnostic",
+        "title": "MARS: Create diagnostic"
+      },
+      {
+        "command": "mars.launchTool",
+        "title": "MARS: Launch tools"
+      },
+      {
         "command": "mars.deploy",
         "title": "MARS: Deploy to RoboRIO"
       },
@@ -62,8 +75,24 @@
         "title": "MARS: Local Simulation"
       },
       {
+        "command": "mars.downloadFeature",
+        "title": "MARS: Install Feature via URL"
+      },
+      {
         "command": "mars.createProject",
         "title": "MARS: Create New Project"
+      },
+      {
+        "command": "mars.createShortcutGCS",
+        "title": "MARS: Create GCS Desktop Shortcut"
+      },
+      {
+        "command": "mars.createShortcutAlloy",
+        "title": "MARS: Create Alloy Desktop Shortcut"
+      },
+      {
+        "command": "mars.createShortcutLogTool",
+        "title": "MARS: Create LogTool Desktop Shortcut"
       },
       {
         "command": "mars.settings",
@@ -91,7 +120,7 @@
       },
       {
         "command": "mars.createModule",
-        "title": "Mars: createModule"
+        "title": "MARS: createModule"
       }
     ],
     "viewsContainers": {

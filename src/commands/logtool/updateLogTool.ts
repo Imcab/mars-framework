@@ -1,21 +1,28 @@
+// src/commands/logtool/updateLogTool.ts
 
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
 import axios from 'axios';
+import * as cp from 'child_process'; 
 // @ts-ignore
 import AdmZip = require('adm-zip');
+
+// 1. Importamos las constantes
+import { LOGTOOL } from './logToolConstants';
 
 export function registerLogToolUpdaterCommand(context: vscode.ExtensionContext) {
     let updateLogToolCmd = vscode.commands.registerCommand('mars.updateLogTool', async () => {
         
-        const workspaceFolders = vscode.workspace.workspaceFolders;
-        if (!workspaceFolders) {
-            vscode.window.showErrorMessage('FAULT: Open a MARS project first to update LogTool.');
+        // 2. Leemos la ruta global
+        const config = vscode.workspace.getConfiguration('marsFramework');
+        const toolsPath = config.get<string>('toolsPath', '');
+
+        if (!toolsPath) {
+            vscode.window.showErrorMessage('FAULT: MARS Tools path is not configured in Settings.');
             return;
         }
-        const projectPath = workspaceFolders[0].uri.fsPath;
 
         vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
@@ -25,21 +32,21 @@ export function registerLogToolUpdaterCommand(context: vscode.ExtensionContext) 
             
             try {
                 progress.report({ message: "Checking for LogTool updates..." });
-                // APUNTANDO AL NUEVO REPOSITORIO DE ALLOY
-                const ghUrl = 'https://api.github.com/repos/STZ-Robotics/MarsLogTool/releases/latest';
-                const response = await axios.get(ghUrl);
+                
+                // 3. Usamos la URL de las constantes
+                const response = await axios.get(LOGTOOL.REPO_URL);
                 
                 const latestVersion = response.data.tag_name;
                 const assets = response.data.assets;
                 
-                // BUSCANDO EL ZIP DE ALLOY
-                const zipAsset = assets.find((a: any) => a.name === 'mars-logtool.zip');
+                // Buscamos el ZIP usando el nombre en la constante
+                const zipAsset = assets.find((a: any) => a.name === LOGTOOL.ZIP_FILE);
                 if (!zipAsset) {
-                    throw new Error("mars-logtool.zip not found in the latest release.");
+                    throw new Error(`${LOGTOOL.ZIP_FILE} not found in the latest release.`);
                 }
 
                 const userChoice = await vscode.window.showInformationMessage(
-                    `MARS LogTool ${latestVersion} is available! Do you want to update the dashboard for this project?`,
+                    `MARS LogTool ${latestVersion} is available! Do you want to download or update the global LogTool?`,
                     "Yes, Update Now", "Cancel"
                 );
 
@@ -49,7 +56,7 @@ export function registerLogToolUpdaterCommand(context: vscode.ExtensionContext) 
 
                 progress.report({ message: `Downloading MARS LogTool ${latestVersion}...` });
                 
-                const zipPath = path.join(os.tmpdir(), 'mars-logtool.zip');
+                const zipPath = path.join(os.tmpdir(), LOGTOOL.ZIP_FILE);
                 const writer = fs.createWriteStream(zipPath);
                 
                 const downloadResponse = await axios({
@@ -67,9 +74,19 @@ export function registerLogToolUpdaterCommand(context: vscode.ExtensionContext) 
 
                 progress.report({ message: "Extracting and installing..." });
                 
-                // LA RUTA EXACTA DE ALLOY EN TU PROYECTO
-                const targetDir = path.join(projectPath, 'mars-logtool', 'Release');
+                // 4. Armamos el directorio destino global
+                const targetDir = path.join(toolsPath, LOGTOOL.FOLDER);
                 
+                // ✨ LA MAGIA: ASESINAR EL PROCESO ZOMBIE USANDO LA CONSTANTE
+                try {
+                    if (os.platform() === 'win32') {
+                        cp.execSync(`taskkill /f /im ${LOGTOOL.EXE}`, { stdio: 'ignore' });
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                    }
+                } catch (e) {
+                    // Ignorar
+                }
+
                 if (fs.existsSync(targetDir)) {
                     fs.rmSync(targetDir, { recursive: true, force: true });
                 }
@@ -80,7 +97,7 @@ export function registerLogToolUpdaterCommand(context: vscode.ExtensionContext) 
 
                 fs.unlinkSync(zipPath);
 
-                vscode.window.showInformationMessage(`SYSTEM UPDATE: MARS LogTool successfully updated to ${latestVersion}!`);
+                vscode.window.showInformationMessage(`SYSTEM UPDATE: MARS LogTool successfully installed to ${latestVersion}!`);
 
             } catch (error: any) {
                 console.error(error);

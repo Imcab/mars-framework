@@ -1,16 +1,23 @@
 import * as vscode from 'vscode';
 
-import { registerTerminalCommand } from './commands/terminalCommand';
-import { registerBuildCommands } from './commands/buildCommands';
+import * as path from 'path';
+import * as os from 'os';
+import * as fs from 'fs';
+
 import { registerProjectCreatorCommand } from './commands/projectCreator';
 import { MarsSidePanelProvider } from './views/side';
 import { registerSettingsCommand } from './commands/settings';
-import { registerAlloyCommand } from './commands/alloy';
-import { registerUpdaterCommand } from './commands/updater';
-import { registerAlloyUpdaterCommand } from './commands/updateAlloy';
-import { registerLogToolUpdaterCommand } from './commands/updateLogTool';
-import { registerLogToolCommand } from './commands/logtool';
-import { registerGenerateModuleCommand } from './commands/generateModule';
+import { registerUpdaterCommand } from './commands/gcs/updateGCS';
+import { registerAlloyUpdaterCommand } from './commands/alloy/updateAlloy';
+import { registerLogToolUpdaterCommand } from './commands/logtool/updateLogTool';
+import { registerGenerateModuleCommand } from './commands/codegeneration/generateModule';
+import { registerShortcutCommand } from './commands/gcs/createShortCutGCS';
+import { registerShortcutAlloyCommand } from './commands/alloy/createShortCutAlloy';
+import { registerShortcutLogToolCommand } from './commands/logtool/createShortCutLogTool';
+import { registerDownloadFeatureCommand } from './commands/marketplace/downloadFeature';
+import { registerLaunchToolCommand } from './commands/launchTool';
+import { registerDiagnosticCommand } from './commands/codegeneration/createDiagnostic';
+import { registerMarketplaceCommand } from './commands/marketplace/marketplace';
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('MARS Framework extension is now active!');
@@ -22,17 +29,49 @@ export function activate(context: vscode.ExtensionContext) {
         )
     );
 
-    registerTerminalCommand(context);
-    registerBuildCommands(context);
+    //PANELES
     registerProjectCreatorCommand(context);
     registerSettingsCommand(context);
-    registerAlloyCommand(context);
-    registerLogToolCommand(context);
-    registerUpdaterCommand(context);
-    registerAlloyUpdaterCommand(context);
-    registerLogToolUpdaterCommand(context);
+    registerLaunchToolCommand(context);
+    registerMarketplaceCommand(context);
 
+    //UPDATERS
+    registerUpdaterCommand(context); //GCS
+    registerAlloyUpdaterCommand(context); //ALLOY
+    registerLogToolUpdaterCommand(context); //LOGTOOL
+
+    //GRENERACION DE CODIGO
     registerGenerateModuleCommand(context);
+
+    //SHORTCUTS DE PC
+    registerShortcutCommand(context);
+    registerShortcutAlloyCommand(context);
+    registerShortcutLogToolCommand(context);
+
+    //DESCARGAR LIBRERIAS
+    registerDownloadFeatureCommand(context);
+
+    registerDiagnosticCommand(context);
+
+    const config = vscode.workspace.getConfiguration('marsFramework');
+    let currentToolsPath = config.get<string>('toolsPath', '');
+
+    if (!currentToolsPath) {
+
+        currentToolsPath = path.join(os.homedir(), 'MARSTools');
+        
+        config.update('toolsPath', currentToolsPath, vscode.ConfigurationTarget.Global);
+    }
+
+    if (!fs.existsSync(currentToolsPath)) {
+        try {
+
+            fs.mkdirSync(currentToolsPath, { recursive: true });
+            vscode.window.showInformationMessage(`MARS Tools directory automatically created at: ${currentToolsPath}`);
+        } catch (error) {
+            vscode.window.showErrorMessage(`Failed to create MARS Tools directory: ${error}`);
+        }
+    }
 }
 
 export function deactivate() {}

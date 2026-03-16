@@ -1,25 +1,29 @@
-// src/commands/updater.ts
+// src/commands/gcs/updater.ts
 
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
 import axios from 'axios';
-// @ts-ignore (En caso de que el linter se ponga especial con adm-zip)
+import * as cp from 'child_process';
+// @ts-ignore
 import AdmZip = require('adm-zip'); 
+
+// 1. Importamos las constantes de GCS
+import { GCS } from './gcsConstants';
 
 export function registerUpdaterCommand(context: vscode.ExtensionContext) {
     let updateCmd = vscode.commands.registerCommand('mars.updateGCS', async () => {
         
-        // 1. Verificar que estamos dentro de un proyecto
-        const workspaceFolders = vscode.workspace.workspaceFolders;
-        if (!workspaceFolders) {
-            vscode.window.showErrorMessage('FAULT: Open a MARS project first to update its GCS.');
+        // 2. Leemos la ruta global (ya no buscamos proyectos abiertos)
+        const config = vscode.workspace.getConfiguration('marsFramework');
+        const toolsPath = config.get<string>('toolsPath', '');
+
+        if (!toolsPath) {
+            vscode.window.showErrorMessage('FAULT: MARS Tools path is not configured in Settings.');
             return;
         }
-        const projectPath = workspaceFolders[0].uri.fsPath;
 
-        // 2. Iniciar el proceso con una barra de carga elegante
         vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
             title: "Connecting to MARS Servers...",
@@ -27,34 +31,32 @@ export function registerUpdaterCommand(context: vscode.ExtensionContext) {
         }, async (progress) => {
             
             try {
-                // 3. Checar la API de GitHub para ver el último release
                 progress.report({ message: "Checking for updates..." });
-                const ghUrl = 'https://api.github.com/repos/Imcab/MarsGCS/releases/latest';
-                const response = await axios.get(ghUrl);
                 
-                const latestVersion = response.data.tag_name; // ej. "v1.0.0"
+                // 3. Usamos la URL de nuestras constantes
+                const response = await axios.get(GCS.REPO_URL);
+                
+                const latestVersion = response.data.tag_name;
                 const assets = response.data.assets;
                 
-                // Buscar el zip en los assets
-                const zipAsset = assets.find((a: any) => a.name === 'mars_terminal.zip');
+                // Usamos el nombre del ZIP de nuestras constantes
+                const zipAsset = assets.find((a: any) => a.name === GCS.ZIP_FILE);
                 if (!zipAsset) {
-                    throw new Error("mars_terminal.zip not found in the latest release.");
+                    throw new Error(`${GCS.ZIP_FILE} not found in the latest release.`);
                 }
 
-                // 4. Preguntar al usuario si quiere actualizar
                 const userChoice = await vscode.window.showInformationMessage(
-                    `MARS GCS ${latestVersion} is available! Do you want to update the terminal for this project?`,
+                    `MARS GCS ${latestVersion} is available! Do you want to download or update the global terminal?`,
                     "Yes, Update Now", "Cancel"
                 );
 
                 if (userChoice !== "Yes, Update Now") {
-                    return; // El usuario canceló
+                    return; 
                 }
 
-                // 5. Descargar el .zip a la carpeta temporal de la compu
                 progress.report({ message: `Downloading MARS GCS ${latestVersion}...` });
                 
-                const zipPath = path.join(os.tmpdir(), 'mars_terminal.zip');
+                const zipPath = path.join(os.tmpdir(), GCS.ZIP_FILE);
                 const writer = fs.createWriteStream(zipPath);
                 
                 const downloadResponse = await axios({
@@ -65,32 +67,38 @@ export function registerUpdaterCommand(context: vscode.ExtensionContext) {
 
                 downloadResponse.data.pipe(writer);
 
-                // Esperar a que termine de descargar
                 await new Promise<void>((resolve, reject) => {
                     writer.on('finish', resolve);
                     writer.on('error', reject);
                 });
 
-                // 6. Preparar la carpeta del proyecto y extraer
                 progress.report({ message: "Extracting and installing..." });
                 
-                const targetDir = path.join(projectPath, 'mars_terminal', 'Release');
+                // 4. Armamos el directorio destino usando la ruta global + constantes
+                const targetDir = path.join(toolsPath, GCS.FOLDER);
                 
-                // Borrar la carpeta vieja si existe
+                // ✨ LA MAGIA: ASESINAR EL PROCESO DE LA GCS
+                try {
+                    if (os.platform() === 'win32') {
+                        // Usamos el ejecutable de nuestras constantes
+                        cp.execSync(`taskkill /f /im ${GCS.EXE}`, { stdio: 'ignore' });
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                    }
+                } catch (e) {
+                    // Ignorar si no estaba corriendo
+                }
+
                 if (fs.existsSync(targetDir)) {
                     fs.rmSync(targetDir, { recursive: true, force: true });
                 }
-                // Crear la carpeta de nuevo
                 fs.mkdirSync(targetDir, { recursive: true });
 
-                // Descomprimir
                 const zip = new AdmZip(zipPath);
                 zip.extractAllTo(targetDir, true);
 
-                // Limpiar el .zip temporal para no dejar basura
                 fs.unlinkSync(zipPath);
 
-                vscode.window.showInformationMessage(`SYSTEM UPDATE: MARS GCS successfully updated to ${latestVersion}!`);
+                vscode.window.showInformationMessage(`SYSTEM UPDATE: MARS GCS successfully installed to ${latestVersion}!`);
 
             } catch (error: any) {
                 console.error(error);

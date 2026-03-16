@@ -19,20 +19,30 @@ export function registerSettingsCommand(context: vscode.ExtensionContext) {
         const config = vscode.workspace.getConfiguration('marsFramework');
         const teamNumber = config.get('teamNumber', '');
         const workspacePath = config.get('workspacePath', '');
+        const toolsPath = config.get('toolsPath', '')
         const autoSave = config.get('autoSaveDeploy', true);
 
-        const imagePath = vscode.Uri.joinPath(context.extensionUri, 'media', 'mars-banner-alt.png');
+        const imagePath = vscode.Uri.joinPath(context.extensionUri, 'media', 'mars-banner.png');
         const imageUri = panel.webview.asWebviewUri(imagePath);
 
-        // 2. Inyectar valores iniciales
+        const stylePath = vscode.Uri.joinPath(context.extensionUri, 'media', 'settings.css');
+        const styleUri = panel.webview.asWebviewUri(stylePath);
+
         panel.webview.html = getSettingsHtml(
             imageUri.toString(), 
+            styleUri.toString(),
             teamNumber as string,  
             workspacePath as string, 
+            toolsPath as string,
             autoSave as boolean
         );
 
         panel.webview.onDidReceiveMessage(async message => {
+
+            if (message.command && message.command.startsWith('mars.')) {
+                vscode.commands.executeCommand(message.command);
+            }
+
             if (message.command === 'selectFile') {
                 const fileUri = await vscode.window.showOpenDialog({
                     canSelectFiles: true,
@@ -56,11 +66,12 @@ export function registerSettingsCommand(context: vscode.ExtensionContext) {
             }
             else if (message.command === 'save') {
                 try {
-
+                    
                     await config.update('teamNumber', message.data.teamNumber, vscode.ConfigurationTarget.Global);
-                    await config.update('terminalPath', message.data.terminalPath, vscode.ConfigurationTarget.Global);
                     await config.update('workspacePath', message.data.workspacePath, vscode.ConfigurationTarget.Global);
-                    await config.update('logVaultPath', message.data.logVaultPath, vscode.ConfigurationTarget.Global);
+                    
+                    await config.update('toolsPath', message.data.toolsPath, vscode.ConfigurationTarget.Global);
+                    
                     await config.update('autoSaveDeploy', message.data.autoSave, vscode.ConfigurationTarget.Global);
 
                     vscode.window.showInformationMessage('MARS Settings saved successfully!');
