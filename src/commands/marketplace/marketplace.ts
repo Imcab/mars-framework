@@ -29,7 +29,7 @@ export function registerMarketplaceCommand(context: vscode.ExtensionContext) {
         let loadedFeatures: any[] = [];
 
         try {
-            const registryUrl = 'https://raw.githubusercontent.com/Imcab/Mars-marketplace/main/registry.json';
+            const registryUrl = 'https://raw.githubusercontent.com/STZ-Robotics/Mars-marketplace/main/registry.json';
             const registryResponse = await axios.get(registryUrl);
             const featureUrls: string[] = registryResponse.data.verifiedFeatures;
 
@@ -42,7 +42,6 @@ export function registerMarketplaceCommand(context: vscode.ExtensionContext) {
                 }
             }
 
-            // --- LÓGICA DE DETECCIÓN LOCAL (Para botones dinámicos) ---
             const rootPath = workspaceFolders[0].uri.fsPath;
             const featuresPath = path.join(rootPath, 'workspace', 'features');
             
@@ -51,15 +50,14 @@ export function registerMarketplaceCommand(context: vscode.ExtensionContext) {
                 if (fs.existsSync(localJsonPath)) {
                     try {
                         const localData = JSON.parse(fs.readFileSync(localJsonPath, 'utf8'));
-                        feat.installedVersion = localData.version; // Le pasamos la versión local
+                        feat.installedVersion = localData.version;
                     } catch (e) {
                         console.warn(`[MARS] Could not read local feature data for ${feat.featureId}`);
                     }
                 } else {
-                    feat.installedVersion = null; // No está instalado
+                    feat.installedVersion = null;
                 }
             }
-            // --- FIN DE LÓGICA DE DETECCIÓN ---
             
             panel.webview.postMessage({ command: 'loadFeatures', features: loadedFeatures });
 
